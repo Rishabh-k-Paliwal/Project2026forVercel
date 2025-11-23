@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { productAPI } from '../../services/api';
 import ProductCard from './ProductCard';
 import LocationPicker from './LocationPicker';
@@ -18,11 +18,7 @@ const ProductList = () => {
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [searchQuery, selectedLocation]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -39,8 +35,6 @@ const ProductList = () => {
         response = await productAPI.search(searchParams);
       } else {
         // Request a high limit to get all products for client-side pagination
-        // This fixes the issue where backend default pagination (limit=12) 
-        // was preventing the frontend from seeing all products
         response = await productAPI.getAll({ limit: 1000 });
       }
 
@@ -53,7 +47,11 @@ const ProductList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, selectedLocation]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleSearch = (e) => {
     e.preventDefault();

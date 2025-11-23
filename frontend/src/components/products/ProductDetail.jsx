@@ -15,17 +15,7 @@ const ProductDetail = () => {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [mainImage, setMainImage] = useState(null);
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
-
-  useEffect(() => {
-    if (product?.images?.length > 0) {
-      setMainImage(product.images[0]);
-    }
-  }, [product]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await productAPI.getById(id);
@@ -36,7 +26,17 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
+
+  useEffect(() => {
+    if (product?.images?.length > 0) {
+      setMainImage(product.images[0]);
+    }
+  }, [product]);
 
   const handleBookNow = () => {
     if (!isAuthenticated) {

@@ -107,7 +107,7 @@ export const STORAGE_KEYS = {
   LANGUAGE: 'language',
 };
 
-export default {
+const constants = {
   API_BASE_URL,
   PRODUCT_CATEGORIES,
   BOOKING_STATUS,
@@ -124,3 +124,5 @@ export default {
   SUCCESS_MESSAGES,
   STORAGE_KEYS,
 };
+
+export default constants;

@@ -258,7 +258,7 @@ const AddProductPage = () => {
                             {/* Show previews of uploaded images */}
                             <div className="image-previews">
                                 {formData.images.map((url, idx) => (
-                                    <img key={idx} src={url} alt={`Product Image ${idx + 1}`} className="image-preview" />
+                                    <img key={idx} src={url} alt={`Product ${idx + 1}`} className="image-preview" />
                                 ))}
                             </div>
                         </div>

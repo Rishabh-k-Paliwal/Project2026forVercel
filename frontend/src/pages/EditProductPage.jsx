@@ -31,11 +31,7 @@ const EditProductPage = () => {
     availability: true,
   });
 
-  useEffect(() => {
-    fetchProduct();
-  }, [id]);
-
-  const fetchProduct = async () => {
+  const fetchProduct = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await productAPI.getById(id);
@@ -60,7 +56,11 @@ const EditProductPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProduct();
+  }, [fetchProduct]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
