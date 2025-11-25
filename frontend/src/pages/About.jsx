@@ -69,11 +69,8 @@ const About = () => {
                             <h3>Instant Booking</h3>
                             <p>Seamless booking process with real-time availability and instant confirmation.</p>
                         </div>
-                        <div className="value-card glass-panel">
-                            <span className="value-icon">💎</span>
-                            <h3>Premium Quality</h3>
-                            <p>All devices are quality checked and sanitized before every rental.</p>
-                        </div>
+                      
+                         
                     </div>
                 </section>
             </div>
