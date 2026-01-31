@@ -20,7 +20,8 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
   process.env.FRONTEND_URL,
-  'https://project2026for-vercel-bt3c.vercel.app'
+  'https://project2026for-vercel-bt3c.vercel.app',
+  'https://project2026for-vercel-bt3c-pkrgmll6i.vercel.app'
 ].filter(Boolean);
 
 app.use(
