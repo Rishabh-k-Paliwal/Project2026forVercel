@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { productAPI } from '../../services/api';
+import { productAPI, bookingAPI, reviewAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import BookingForm from '../booking/BookingForm';
+import ReviewsList from './ReviewsList';
+import ReviewForm from './ReviewForm';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -14,6 +16,9 @@ const ProductDetail = () => {
   const [error, setError] = useState('');
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [mainImage, setMainImage] = useState(null);
+  const [canReview, setCanReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [reviewRefreshKey, setReviewRefreshKey] = useState(0);
 
   const fetchProduct = React.useCallback(async () => {
     try {
@@ -37,6 +42,47 @@ const ProductDetail = () => {
       setMainImage(product.images[0]);
     }
   }, [product]);
+
+  useEffect(() => {
+    const checkCanReview = async () => {
+      if (!isAuthenticated || !product) {
+        setCanReview(false);
+        return;
+      }
+
+      try {
+        // Check user's completed bookings for this product
+        const resp = await bookingAPI.getMyBookings();
+        const bookings = resp.data.data || [];
+        const completed = bookings.find(
+          (b) =>
+            b.product &&
+            ((b.product._id && b.product._id === product._id) ||
+              (b.product && b.product.toString && b.product.toString() === product._id)) &&
+            b.status === 'completed'
+        );
+
+        setCanReview(!!completed);
+
+        // Check if user has already left a review
+        const reviewsResp = await reviewAPI.getByProduct(product._id, { page: 1, limit: 100 });
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const myReview = (reviewsResp.data.data || []).find((r) => r.user && r.user.name === currentUser.name);
+        setHasReviewed(!!myReview);
+        if (myReview) setCanReview(false);
+      } catch (err) {
+        console.error('Error checking review eligibility', err);
+      }
+    };
+
+    checkCanReview();
+  }, [isAuthenticated, product, reviewRefreshKey]);
+
+  const onReviewSubmitted = () => {
+    setReviewRefreshKey((k) => k + 1);
+    setHasReviewed(true);
+    setCanReview(false);
+  };
 
   const handleBookNow = () => {
     if (!isAuthenticated) {
@@ -106,6 +152,13 @@ const ProductDetail = () => {
             <span className="price-value">₹{product.pricePerDay}/day</span>
           </div>
 
+          {product.reviewsCount > 0 && (
+            <div className="product-rating">
+              <span className="rating-stars">{'★'.repeat(Math.round(product.averageRating))}{'☆'.repeat(5 - Math.round(product.averageRating))}</span>
+              <span className="rating-info">{product.averageRating} ({product.reviewsCount})</span>
+            </div>
+          )}
+
           <div className="product-availability">
             {product.availability ? (
               <span className="status-available">✓ Available</span>
@@ -157,6 +210,20 @@ const ProductDetail = () => {
           onClose={() => setShowBookingForm(false)}
         />
       )}
+
+      <section className="product-reviews container">
+        <h2>Customer Reviews</h2>
+
+        {canReview && !hasReviewed && (
+          <ReviewForm productId={product._id} onSubmitted={onReviewSubmitted} />
+        )}
+
+        {!canReview && !hasReviewed && isAuthenticated && (
+          <p className="small-note">You can leave a review after you complete a booking for this product.</p>
+        )}
+
+        <ReviewsList productId={product._id} refreshKey={reviewRefreshKey} />
+      </section>
     </div>
   );
 };

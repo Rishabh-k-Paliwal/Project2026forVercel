@@ -9,7 +9,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'renter' // Default role
+    role: 'user' // Default role (matches backend enum: user, owner, admin)
   });
   const [error, setError] = useState('');
   const { register } = useAuth();
@@ -31,7 +31,7 @@ const Register = () => {
       await register(formData.name, formData.email, formData.password, formData.role);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to register');
+      setError(err.response?.data?.error || 'Failed to register');
     }
   };
 
@@ -111,7 +111,7 @@ const Register = () => {
                 width: '100%'
               }}
             >
-              <option value="renter">Rent Items</option>
+            <option value="user">Rent Items</option>
               <option value="owner">List Items</option>
             </select>
           </div>

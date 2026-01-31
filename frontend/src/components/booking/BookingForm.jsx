@@ -90,10 +90,22 @@ const BookingForm = ({ product, onClose }) => {
       name: 'ElectroRent',
       description: `Booking for ${product.name}`,
       order_id: order.id,
-      handler: function (response) {
-        // Payment successful
-        alert('Payment successful! Booking confirmed.');
-        navigate('/dashboard');
+      handler: async function (response) {
+        // Payment successful - notify backend to confirm payment
+        try {
+          await bookingAPI.confirm({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature,
+            bookingId: booking._id,
+          });
+
+          alert('Payment successful! Booking confirmed.');
+          navigate('/dashboard');
+        } catch (err) {
+          console.error('Payment confirmation failed', err);
+          alert('Payment succeeded but confirmation failed. Please contact support.');
+        }
       },
       prefill: {
         name: 'User Name',

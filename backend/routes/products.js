@@ -10,11 +10,18 @@ const {
 } = require('../controllers/productController');
 const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roleCheck');
-const { productValidation, validate } = require('../utils/validators');
+const { productValidation, validate, reviewValidation } = require('../utils/validators');
+const { addReview, getReviews } = require('../controllers/reviewController');
 
 // Public routes
 router.get('/', getProducts);
 router.get('/search', searchProducts);
+
+// Reviews (must come before the generic :id route)
+router.get('/:id/reviews', getReviews);
+router.post('/:id/reviews', protect, reviewValidation, validate, addReview);
+
+// Single product (must be after reviews routes)
 router.get('/:id', getProduct);
 
 // Protected routes (owner/admin only)

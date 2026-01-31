@@ -28,7 +28,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Debug logging for failed API calls
+    console.error('API Error:', error.response?.status, error.config?.method?.toUpperCase(), error.config?.url, error.response?.data);
+
     if (error.response?.status === 401) {
+      console.warn('Unauthorized - clearing auth and redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -54,6 +58,12 @@ export const productAPI = {
   delete: (id) => api.delete(`/products/${id}`),
 };
 
+// Review APIs
+export const reviewAPI = {
+  getByProduct: (productId, params) => api.get(`/products/${productId}/reviews`, { params }),
+  create: (productId, data) => api.post(`/products/${productId}/reviews`, data),
+};
+
 // Booking APIs
 export const bookingAPI = {
   create: (data) => api.post('/bookings', data),
@@ -61,6 +71,7 @@ export const bookingAPI = {
   getById: (id) => api.get(`/bookings/${id}`),
   update: (id, data) => api.put(`/bookings/${id}`, data),
   cancel: (id) => api.delete(`/bookings/${id}`),
+  confirm: (data) => api.post('/bookings/confirm', data),
 };
 
 // Dashboard API

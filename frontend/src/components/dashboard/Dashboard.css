@@ -378,6 +378,58 @@
   text-align: center;
 }
 
+/* Review button */
+.btn-leave-review {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+.btn-leave-review:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* Review modal */
+.review-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.review-modal {
+  width: 100%;
+  max-width: 700px;
+  background: rgba(15,23,42,0.95);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+}
+
+.review-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.review-modal .btn-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
 .btn-view {
   background: rgba(59, 130, 246, 0.1);
   color: var(--accent);

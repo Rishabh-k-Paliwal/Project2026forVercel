@@ -1,5 +1,7 @@
 const Booking = require('../models/Booking');
 const Product = require('../models/Product');
+const User = require('../models/User');
+const crypto = require('crypto');
 const razorpay = require('../config/payment');
 const { sendBookingNotification } = require('../services/notificationService');
 
@@ -74,6 +76,59 @@ const createBooking = async (req, res) => {
       success: false,
       error: error.message,
     });
+  }
+};
+
+// @desc    Confirm payment from client and verify with signature
+// @route   POST /api/bookings/confirm
+// @access  Private
+const confirmPayment = async (req, res) => {
+  try {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, bookingId } = req.body;
+
+    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing payment details' });
+    }
+
+    // Verify signature
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Invalid payment signature' });
+    }
+
+    // Find booking by ID or by order id if bookingId not provided
+    let booking;
+    if (bookingId) {
+      booking = await Booking.findById(bookingId);
+    } else {
+      booking = await Booking.findOne({ paymentId: razorpay_order_id });
+    }
+
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Booking not found' });
+    }
+
+    // Check owner
+    if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Not authorized to confirm this booking' });
+    }
+
+    booking.status = 'confirmed';
+    booking.paymentStatus = 'completed';
+    booking.save();
+
+    // Send confirmation notification
+    const user = await User.findById(booking.user).select('name email phone');
+    await sendBookingNotification(booking, user, 'confirmed');
+
+    res.json({ success: true, data: booking });
+  } catch (error) {
+    console.error('Confirm payment error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -234,9 +289,9 @@ const paymentWebhook = async (req, res) => {
 
     if (event === 'payment.captured') {
       const bookingId = payload.payment.entity.notes.bookingId;
-      
+
       const booking = await Booking.findById(bookingId);
-      
+
       if (booking) {
         booking.status = 'confirmed';
         booking.paymentStatus = 'completed';
@@ -264,4 +319,5 @@ module.exports = {
   updateBooking,
   cancelBooking,
   paymentWebhook,
+  confirmPayment,
 };

@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
-import { bookingAPI } from '../../services/api';
+import React, { useState, useEffect } from 'react';
+import { bookingAPI, reviewAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import ReviewForm from '../products/ReviewForm';
 import './Dashboard.css';
 
 const MyBookings = ({ bookings, onUpdate }) => {
+  const { user } = useAuth();
   const [editingBooking, setEditingBooking] = useState(null);
   const [formData, setFormData] = useState({
     startDate: '',
     endDate: '',
   });
   const [loading, setLoading] = useState(false);
+
+  // review state
+  const [canLeaveReview, setCanLeaveReview] = useState({}); // productId -> boolean
+  const [checkingReviews, setCheckingReviews] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
 
   const handleEdit = (booking) => {
     setEditingBooking(booking._id);
@@ -53,6 +63,58 @@ const MyBookings = ({ bookings, onUpdate }) => {
       setLoading(false);
     }
   };
+
+  // Check review eligibility for completed bookings
+  useEffect(() => {
+    let mounted = true;
+
+    const check = async () => {
+      if (!user) return;
+      setCheckingReviews(true);
+
+      const completedBookings = bookings.filter((b) => b.status === 'completed');
+      const map = {};
+
+      for (const b of completedBookings) {
+        try {
+          const resp = await reviewAPI.getByProduct(b.product._id, { page: 1, limit: 100 });
+          const reviews = resp.data.data || [];
+          const hasMyReview = reviews.some((r) => r.user && r.user._id === user._id);
+          map[b.product._id] = !hasMyReview; // can leave review only if not reviewed
+        } catch (err) {
+          // on error, be conservative and hide the button
+          map[b.product._id] = false;
+          console.error('Check review error', err);
+        }
+      }
+
+      if (mounted) {
+        setCanLeaveReview(map);
+        setCheckingReviews(false);
+      }
+    };
+
+    check();
+
+    return () => {
+      mounted = false;
+    };
+  }, [bookings, user]);
+
+  const openReviewModal = (productId) => {
+    setSelectedProductId(productId);
+    setShowReviewModal(true);
+  };
+
+  const onReviewSubmitted = () => {
+    // hide modal & mark as reviewed
+    setShowReviewModal(false);
+    setCanLeaveReview((prev) => ({ ...prev, [selectedProductId]: false }));
+    setSelectedProductId(null);
+    // refresh parent data
+    if (onUpdate) onUpdate();
+  };
+
 
   if (bookings.length === 0) {
     return (
@@ -141,28 +203,61 @@ const MyBookings = ({ bookings, onUpdate }) => {
                   </div>
                 </div>
 
-                {booking.status === 'pending' && (
-                  <div className="booking-actions">
-                    <button
-                      onClick={() => handleEdit(booking)}
-                      className="btn-edit"
-                    >
-                      Edit Dates
-                    </button>
-                    <button
-                      onClick={() => handleCancel(booking._id)}
-                      className="btn-cancel-booking"
-                      disabled={loading}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                )}
+                <div className="booking-actions">
+                  {booking.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleEdit(booking)}
+                        className="btn-edit"
+                      >
+                        Edit Dates
+                      </button>
+                      <button
+                        onClick={() => handleCancel(booking._id)}
+                        className="btn-cancel-booking"
+                        disabled={loading}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+
+                  {/* Leave Review button for completed bookings */}
+                  {booking.status === 'completed' && (
+                    <>
+                      {checkingReviews ? (
+                        <span className="small-note">Checking review...</span>
+                      ) : canLeaveReview[booking.product._id] ? (
+                        <button
+                          onClick={() => openReviewModal(booking.product._id)}
+                          className="btn-leave-review"
+                        >
+                          Leave Review
+                        </button>
+                      ) : (
+                        <span className="small-note">Already reviewed</span>
+                      )}
+                    </>
+                  )}
+                </div>
               </>
             )}
           </div>
         ))}
       </div>
+
+      {showReviewModal && (
+        <div className="review-modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="review-modal-header">
+              <h3>Leave a Review</h3>
+              <button className="btn-close" onClick={() => setShowReviewModal(false)}>✕</button>
+            </div>
+
+            <ReviewForm productId={selectedProductId} onSubmitted={onReviewSubmitted} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
