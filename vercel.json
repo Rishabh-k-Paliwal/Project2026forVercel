@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
         {
-            "src": "backend/server.js",
+            "src": "api/index.js",
             "use": "@vercel/node"
         },
         {
@@ -16,7 +16,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "backend/server.js"
+            "destination": "api/index.js"
         },
         {
             "source": "/static/(.*)",
@@ -29,18 +29,6 @@
         {
             "source": "/manifest.json",
             "destination": "/frontend/manifest.json"
-        },
-        {
-            "source": "/logo192.png",
-            "destination": "/frontend/logo192.png"
-        },
-        {
-            "source": "/logo512.png",
-            "destination": "/frontend/logo512.png"
-        },
-        {
-            "source": "/robots.txt",
-            "destination": "/frontend/robots.txt"
         },
         {
             "source": "/(.*)",
