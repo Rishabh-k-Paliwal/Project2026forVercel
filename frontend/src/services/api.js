@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// Use relative path in production (since backend and frontend are deployed together)
-// Use localhost in development
-const API_URL = process.env.REACT_APP_API_URL ||
-  (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
+// Use REACT_APP_BACKEND_URL from environment variables (set in Vercel)
+// Fallback to localhost for development
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+const API_URL = `${BACKEND_URL.replace(/\/$/, '')}/api`;
 
 // Create axios instance
 const api = axios.create({

@@ -1,6 +1,6 @@
-// API Base URL - use relative path in production since backend/frontend deploy together
-export const API_BASE_URL = process.env.REACT_APP_API_URL ||
-  (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
+// API Base URL - use REACT_APP_BACKEND_URL from environment variables
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+export const API_BASE_URL = `${BACKEND_URL.replace(/\/$/, '')}/api`;
 
 // Product Categories
 export const PRODUCT_CATEGORIES = [
