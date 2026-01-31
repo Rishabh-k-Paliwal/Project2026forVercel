@@ -38,8 +38,11 @@ const ProductList = () => {
         response = await productAPI.getAll({ limit: 1000 });
       }
 
-      console.log('Fetched products count:', response.data.data.length);
-      setProducts(response.data.data);
+      // Defensive check for response data
+      const productsData = response?.data?.data || [];
+      console.log('Fetched products count:', productsData.length);
+      console.log('Full response:', response?.data);
+      setProducts(productsData);
       setCurrentPage(1);
     } catch (err) {
       setError('Failed to load products');
