@@ -13,30 +13,38 @@
             }
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/api/(.*)",
-            "dest": "backend/server.js",
-            "methods": [
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "PATCH",
-                "OPTIONS"
-            ]
+            "source": "/api/(.*)",
+            "destination": "backend/server.js"
         },
         {
-            "src": "/static/(.*)",
-            "dest": "frontend/static/$1"
+            "source": "/static/(.*)",
+            "destination": "/frontend/static/$1"
         },
         {
-            "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|gif|webp|woff|woff2|ttf|eot))",
-            "dest": "frontend/$1"
+            "source": "/favicon.ico",
+            "destination": "/frontend/favicon.ico"
         },
         {
-            "src": "/(.*)",
-            "dest": "frontend/index.html"
+            "source": "/manifest.json",
+            "destination": "/frontend/manifest.json"
+        },
+        {
+            "source": "/logo192.png",
+            "destination": "/frontend/logo192.png"
+        },
+        {
+            "source": "/logo512.png",
+            "destination": "/frontend/logo512.png"
+        },
+        {
+            "source": "/robots.txt",
+            "destination": "/frontend/robots.txt"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/frontend/index.html"
         }
     ]
 }
