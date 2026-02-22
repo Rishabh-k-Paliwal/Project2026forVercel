@@ -4,6 +4,7 @@ const {
   createBooking,
   getMyBookings,
   getBooking,
+  getBookingReceipt,
   updateBooking,
   completeBooking,
   cancelBooking,
@@ -22,6 +23,7 @@ router.post('/confirm', protect, confirmPayment);
 // Protected routes
 router.post('/', protect, bookingValidation, validate, createBooking);
 router.get('/my-bookings', protect, getMyBookings);
+router.get('/:id/receipt', protect, getBookingReceipt);
 router.get('/:id', protect, getBooking);
 router.put('/:id', protect, updateBooking);
 router.patch('/:id/complete', protect, completeBooking);

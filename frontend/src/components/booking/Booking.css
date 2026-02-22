@@ -64,6 +64,21 @@
   font-weight: 700;
 }
 
+.receipt-banner {
+  margin-bottom: 0.7rem;
+  border: 1px solid rgba(29, 181, 138, 0.35);
+  border-radius: var(--radius-sm);
+  background: rgba(29, 181, 138, 0.16);
+  color: #c9ffe9;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.86rem;
+}
+
+.receipt-summary .price-row {
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
 .booking-actions {
   display: flex;
   gap: 0.55rem;
