@@ -232,7 +232,7 @@ const AddProductPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label>Price Per Day (₹) *</label>
+                                <label>Price Per Day (Rs) *</label>
                                 <input
                                     type="number"
                                     name="pricePerDay"
@@ -358,7 +358,7 @@ const AddProductPage = () => {
                             onClick={handleGetLocation}
                             className="btn-get-location"
                         >
-                            📍 Get My Current Location
+                           Get My Current Location
                         </button>
                         <small>Click to automatically detect your location</small>
                     </div>

@@ -47,11 +47,11 @@ function App() {
                 }
               />
 
-              {/* Owner/Admin Routes */}
+              {/* Authenticated user routes */}
               <Route
                 path="/add-product"
                 element={
-                  <ProtectedRoute requiredRole="owner">
+                  <ProtectedRoute>
                     <AddProductPage />
                   </ProtectedRoute>
                 }
@@ -59,7 +59,7 @@ function App() {
               <Route
                 path="/edit-product/:id"
                 element={
-                  <ProtectedRoute requiredRole="owner">
+                  <ProtectedRoute>
                     <EditProductPage />
                   </ProtectedRoute>
                 }

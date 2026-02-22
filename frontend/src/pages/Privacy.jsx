@@ -1,143 +1,82 @@
 import React from 'react';
-import './Terms.css'; // Reusing the same styles
+import './Terms.css';
 
 const Privacy = () => {
-    return (
-        <div className="legal-page">
-            <div className="legal-container">
-                <div className="legal-header">
-                    <h1>Privacy Policy</h1>
-                    <p className="last-updated">Last updated: {new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                </div>
-
-                <div className="legal-content">
-                    <div className="legal-section">
-                        <h2>1. Information We Collect</h2>
-                        <h3>Personal Information</h3>
-                        <p>
-                            We collect information you provide directly to us when you:
-                        </p>
-                        <ul>
-                            <li>Create an account (name, email, phone number)</li>
-                            <li>List a product for rent (product details, location)</li>
-                            <li>Make a booking (payment information, rental dates)</li>
-                            <li>Contact us for support (correspondence, feedback)</li>
-                        </ul>
-                        <h3>Automatically Collected Information</h3>
-                        <ul>
-                            <li>Device information (IP address, browser type)</li>
-                            <li>Usage data (pages visited, time spent)</li>
-                            <li>Location data (with your permission)</li>
-                        </ul>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>2. How We Use Your Information</h2>
-                        <p>
-                            We use the collected information for the following purposes:
-                        </p>
-                        <ul>
-                            <li>Provide, maintain, and improve our services</li>
-                            <li>Process transactions and send related information</li>
-                            <li>Send you technical notices and support messages</li>
-                            <li>Respond to your comments and questions</li>
-                            <li>Monitor and analyze trends and usage</li>
-                            <li>Detect, prevent, and address fraud and security issues</li>
-                        </ul>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>3. Information Sharing</h2>
-                        <p>
-                            We do not sell your personal information. We may share your information in the following situations:
-                        </p>
-                        <div className="legal-highlight">
-                            <p>🔒 Your privacy is our priority. We only share data when necessary for service delivery.</p>
-                        </div>
-                        <ul>
-                            <li>With other users (to facilitate rentals)</li>
-                            <li>With service providers (payment processors, hosting)</li>
-                            <li>For legal compliance (when required by law)</li>
-                            <li>With your consent (when you explicitly agree)</li>
-                        </ul>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>4. Data Security</h2>
-                        <p>
-                            We implement appropriate technical and organizational measures to protect your personal information:
-                        </p>
-                        <ul>
-                            <li>Encryption of data in transit and at rest</li>
-                            <li>Regular security assessments and updates</li>
-                            <li>Access controls and authentication</li>
-                            <li>Secure payment processing through Razorpay</li>
-                        </ul>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>5. Your Rights</h2>
-                        <p>
-                            You have the following rights regarding your personal data:
-                        </p>
-                        <ul>
-                            <li>Access your personal information</li>
-                            <li>Correct inaccurate data</li>
-                            <li>Request deletion of your data</li>
-                            <li>Object to data processing</li>
-                            <li>Export your data</li>
-                            <li>Withdraw consent at any time</li>
-                        </ul>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>6. Cookies & Tracking</h2>
-                        <p>
-                            We use cookies and similar tracking technologies to:
-                        </p>
-                        <ul>
-                            <li>Remember your preferences and settings</li>
-                            <li>Understand how you use our platform</li>
-                            <li>Improve user experience</li>
-                            <li>Provide personalized content</li>
-                        </ul>
-                        <p>
-                            You can control cookies through your browser settings.
-                        </p>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>7. Data Retention</h2>
-                        <p>
-                            We retain your personal information for as long as necessary to provide our services and comply with legal obligations. You may request deletion of your account at any time.
-                        </p>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>8. Children's Privacy</h2>
-                        <p>
-                            Our services are not intended for users under 18 years of age. We do not knowingly collect information from children.
-                        </p>
-                    </div>
-
-                    <div className="legal-section">
-                        <h2>9. Changes to Privacy Policy</h2>
-                        <p>
-                            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.
-                        </p>
-                    </div>
-
-                    <div className="contact-info">
-                        <h3>📧 Contact Us About Privacy</h3>
-                        <p>If you have questions about this Privacy Policy, please contact us:</p>
-                        <p>Email: <a href="mailto:privacy@electrorent.com">privacy@electrorent.com</a></p>
-                        <p>Phone: +91 1234567890</p>
-                        <p>Address: VIT Bhopal University, Bhopal, India</p>
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="legal-page">
+      <div className="legal-container">
+        <div className="legal-header">
+          <h1>Privacy Policy</h1>
+          <p className="last-updated">
+            Last updated: {new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
-    );
+
+        <div className="legal-content">
+          <div className="legal-section">
+            <h2>1. Information We Collect</h2>
+            <ul>
+              <li>Account details such as name, email, and phone number.</li>
+              <li>Product, booking, and transaction related information.</li>
+              <li>Technical and usage data such as browser, device, and IP metadata.</li>
+            </ul>
+          </div>
+
+          <div className="legal-section">
+            <h2>2. How We Use Information</h2>
+            <ul>
+              <li>To operate, improve, and secure the platform.</li>
+              <li>To process bookings, payments, and support requests.</li>
+              <li>To detect fraud and comply with legal obligations.</li>
+            </ul>
+          </div>
+
+          <div className="legal-section">
+            <h2>3. Information Sharing</h2>
+            <p>We do not sell personal information. Data is shared only when needed for platform operation or legal compliance.</p>
+            <div className="legal-highlight">
+              <p>Note: We minimize data sharing and restrict it to necessary partners and service providers.</p>
+            </div>
+          </div>
+
+          <div className="legal-section">
+            <h2>4. Data Security</h2>
+            <ul>
+              <li>Encrypted data transfer and protected infrastructure.</li>
+              <li>Role-based access controls and secure authentication.</li>
+              <li>Ongoing monitoring and security improvements.</li>
+            </ul>
+          </div>
+
+          <div className="legal-section">
+            <h2>5. Your Rights</h2>
+            <ul>
+              <li>Access and correct your personal information.</li>
+              <li>Request deletion where legally applicable.</li>
+              <li>Object to specific processing and withdraw consent.</li>
+            </ul>
+          </div>
+
+          <div className="legal-section">
+            <h2>6. Cookies and Tracking</h2>
+            <p>Cookies help keep sessions active, remember settings, and improve user experience.</p>
+          </div>
+
+          <div className="legal-section">
+            <h2>7. Policy Changes</h2>
+            <p>Policy updates are published on this page with the latest update date.</p>
+          </div>
+
+          <div className="contact-info">
+            <h3>Contact for Privacy Questions</h3>
+            <p>Email: <a href="mailto:privacy@electrorent.com">privacy@electrorent.com</a></p>
+            <p>Phone: +91 1234567890</p>
+            <p>Address: VIT Bhopal University, Bhopal, India</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Privacy;

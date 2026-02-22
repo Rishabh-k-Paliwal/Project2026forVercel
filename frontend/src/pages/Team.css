@@ -1,221 +1,94 @@
 .team-page {
-    min-height: 100vh;
-    padding: var(--spacing-xl) 0;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  padding: 0.5rem 0 1.5rem;
 }
 
 .team-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 var(--spacing-md);
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
 }
 
 .team-header {
-    text-align: center;
-    margin-bottom: var(--spacing-xl);
-    padding: var(--spacing-xl);
-}
-
-.team-header h1 {
-    font-size: 3rem;
-    margin-bottom: var(--spacing-md);
-    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeInDown 0.6s ease-out;
-}
-
-.team-header p {
-    font-size: 1.2rem;
-    color: var(--text-muted);
-    animation: fadeInUp 0.6s ease-out 0.2s both;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(155deg, rgba(34, 47, 67, 0.72), rgba(20, 27, 38, 0.88));
+  padding: 1.5rem 1rem;
 }
 
 .team-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-xl);
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1rem;
 }
 
 .team-member-card {
-    background: rgba(30, 41, 59, 0.4);
-    backdrop-filter: blur(12px);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    padding: var(--spacing-xl);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.team-member-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
-    transform: scaleX(0);
-    transition: transform 0.4s ease;
-}
-
-.team-member-card:hover::before {
-    transform: scaleX(1);
-}
-
-.team-member-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--accent);
-    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+  background: rgba(20, 27, 38, 0.72);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
 }
 
 .member-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
 }
 
 .member-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    border: 3px solid var(--accent);
-    overflow: hidden;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    transition: all 0.3s ease;
-}
-
-.team-member-card:hover .member-avatar {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
-}
-
-.member-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.member-info h3 {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-xs);
-    color: var(--text-main);
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 2px solid rgba(240, 138, 36, 0.5);
+  flex-shrink: 0;
 }
 
 .member-role {
-    display: inline-block;
-    padding: 0.4rem 0.8rem;
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: var(--radius-sm);
-    color: var(--accent);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.member-contributions {
-    margin-top: var(--spacing-md);
+  display: inline-flex;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--accent-soft);
+  color: #ffbe7a;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .member-contributions h4 {
-    font-size: 1.1rem;
-    color: var(--accent);
-    margin-bottom: var(--spacing-sm);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-}
-
-.member-contributions h4::before {
-    content: '⚡';
-    font-size: 1.2rem;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
 }
 
 .member-contributions ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
 }
 
 .member-contributions li {
-    padding: var(--spacing-sm) 0;
-    padding-left: var(--spacing-lg);
-    color: var(--text-muted);
-    line-height: 1.6;
-    position: relative;
-    transition: all 0.3s ease;
+  position: relative;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding-left: 0.8rem;
+  margin-bottom: 0.35rem;
 }
 
 .member-contributions li::before {
-    content: '▸';
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-    font-weight: bold;
-    transition: all 0.3s ease;
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.56rem;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #ffbe7a;
 }
 
-.member-contributions li:hover {
-    color: var(--text-main);
-    padding-left: calc(var(--spacing-lg) + 4px);
-}
-
-.member-contributions li:hover::before {
-    transform: translateX(4px);
-}
-
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@media (max-width: 768px) {
-    .team-header h1 {
-        font-size: 2rem;
-    }
-
-    .team-header p {
-        font-size: 1rem;
-    }
-
-    .team-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
-    }
-
-    .member-header {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .member-avatar {
-        width: 100px;
-        height: 100px;
-    }
+@media (max-width: 640px) {
+  .member-header {
+    align-items: flex-start;
+  }
 }

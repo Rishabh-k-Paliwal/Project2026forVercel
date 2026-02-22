@@ -280,7 +280,7 @@ const EditProductPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Price Per Day (₹) *</label>
+                <label>Price Per Day (Rs) *</label>
                 <input
                   type="number"
                   name="pricePerDay"
@@ -412,7 +412,7 @@ const EditProductPage = () => {
               onClick={handleGetLocation}
               className="btn-get-location"
             >
-              📍 Update Location
+             Update Location
             </button>
           </div>
 
@@ -440,3 +440,4 @@ const EditProductPage = () => {
 };
 
 export default EditProductPage;
+

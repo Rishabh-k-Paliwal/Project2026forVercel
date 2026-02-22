@@ -73,6 +73,7 @@ export const bookingAPI = {
   getMyBookings: () => api.get('/bookings/my-bookings'),
   getById: (id) => api.get(`/bookings/${id}`),
   update: (id, data) => api.put(`/bookings/${id}`, data),
+  complete: (id) => api.patch(`/bookings/${id}/complete`),
   cancel: (id) => api.delete(`/bookings/${id}`),
   confirm: (data) => api.post('/bookings/confirm', data),
 };
