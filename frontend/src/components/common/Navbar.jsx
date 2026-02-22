@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaChevronDown } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import './Navbar.css';
-import { FaChevronDown } from 'react-icons/fa';
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -18,12 +18,14 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo">
-          <span className="logo-icon">⚡</span>
-          ElectroRent
+          <img src="/garuda.png" alt="Garuda logo" className="logo-mark" />
+          <span>
+            ElectroRent
+            <small className="logo-subtitle">A project by Garuda Creation</small>
+          </span>
         </Link>
 
         <div className="navbar-right">
-          {/* Auth Actions */}
           <div className="nav-auth-actions">
             {isAuthenticated ? (
               <>
@@ -44,7 +46,6 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Menu Dropdown */}
           <div
             className="dropdown-container"
             onMouseEnter={() => setDropdownOpen(true)}
@@ -78,9 +79,7 @@ const Navbar = () => {
                     <div className="dropdown-section">
                       <span className="dropdown-header">My Account</span>
                       <Link to="/dashboard" className="dropdown-item">Dashboard</Link>
-                      {(user?.role === 'owner' || user?.role === 'admin') && (
-                        <Link to="/add-product" className="dropdown-item">List New Item</Link>
-                      )}
+                      <Link to="/add-product" className="dropdown-item">List New Item</Link>
                     </div>
                   </>
                 )}

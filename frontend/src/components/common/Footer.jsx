@@ -1,6 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import {
+  FaEnvelope,
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaTwitter,
+} from 'react-icons/fa';
 import './Footer.css';
 
 const Footer = () => {
@@ -10,16 +18,15 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-container">
         <div className="footer-grid">
-          {/* Company Info */}
           <div className="footer-section footer-brand">
             <h3 className="footer-logo">
-              <span className="logo-icon">⚡</span>
+              <img src="/garuda.png" alt="Garuda logo" className="footer-logo-img" />
               ElectroRent
             </h3>
             <p className="footer-description">
-              Your trusted platform for renting premium electronics. Quality products,
-              affordable prices, hassle-free experience.
+              Flexible access to electronics for creators, students, and professionals who want performance without ownership overhead.
             </p>
+            <p className="footer-tagline">A project by Garuda Creation</p>
             <div className="footer-contact-info">
               <div className="contact-item">
                 <FaMapMarkerAlt />
@@ -36,7 +43,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="footer-section">
             <h4>Company</h4>
             <ul className="footer-links">
@@ -47,7 +53,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
           <div className="footer-section">
             <h4>Legal</h4>
             <ul className="footer-links">
@@ -57,33 +62,21 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Social */}
           <div className="footer-section">
-            <h4>Connect With Us</h4>
+            <h4>Connect</h4>
             <div className="social-links">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
-                <FaFacebook />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                <FaTwitter />
-              </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                <FaInstagram />
-              </a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-                <FaLinkedin />
-              </a>
+              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><FaFacebook /></a>
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><FaTwitter /></a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><FaInstagram /></a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><FaLinkedin /></a>
             </div>
-            <p className="social-description">
-              Follow us on social media for updates, deals, and tech tips!
-            </p>
+            <p className="social-description">Follow us for launch updates, featured gear, and platform improvements.</p>
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="footer-bottom">
           <p>&copy; {currentYear} ElectroRent. All rights reserved.</p>
-          <p className="footer-credits">Designed for Capstone 103 | Made with ❤️ by Team ElectroRent</p>
+          <p className="footer-credits">Built by Garuda Creation.</p>
         </div>
       </div>
     </footer>
