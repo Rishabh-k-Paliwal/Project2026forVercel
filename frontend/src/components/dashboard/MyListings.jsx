@@ -8,10 +8,7 @@ const MyListings = ({ listings, onUpdate }) => {
   const [loading, setLoading] = useState(false);
 
   const handleDelete = async (productId) => {
-    if (!window.confirm('Are you sure you want to delete this listing?')) {
-      return;
-    }
-
+    if (!window.confirm('Are you sure you want to delete this listing?')) return;
     setLoading(true);
     try {
       await productAPI.delete(productId);
@@ -27,12 +24,10 @@ const MyListings = ({ listings, onUpdate }) => {
   const toggleAvailability = async (product) => {
     setLoading(true);
     try {
-      await productAPI.update(product._id, {
-        availability: !product.availability,
-      });
+      await productAPI.update(product._id, { availability: !product.availability });
       alert('Availability updated');
       onUpdate();
-    } catch (error) {
+    } catch {
       alert('Failed to update availability');
     } finally {
       setLoading(false);
@@ -43,13 +38,8 @@ const MyListings = ({ listings, onUpdate }) => {
     return (
       <div className="no-data">
         <h3>No listings yet</h3>
-        <p>Create your first listing to start renting out your electronics!</p>
-        <button
-          onClick={() => navigate('/add-product')}
-          className="btn-add-product"
-        >
-          Add Product
-        </button>
+        <p>Create your first listing to start renting out your electronics.</p>
+        <button onClick={() => navigate('/add-product')} className="btn-add-product">Add Product</button>
       </div>
     );
   }
@@ -58,27 +48,15 @@ const MyListings = ({ listings, onUpdate }) => {
     <div className="listings-container">
       <div className="dashboard-header-mini" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2>My Listings</h2>
-        <button
-          onClick={() => navigate('/add-product')}
-          className="btn-add-product"
-        >
-          + Add New Product
-        </button>
+        <button onClick={() => navigate('/add-product')} className="btn-add-product">Add New Product</button>
       </div>
 
       <div className="listings-grid">
         {listings.map((product) => (
           <div key={product._id} className="listing-card">
             <div className="listing-image">
-              {product.images && product.images.length > 0 ? (
-                <img src={product.images[0]} alt={product.name} />
-              ) : (
-                <div className="no-image">📦</div>
-              )}
-              <div
-                className={`availability-badge ${product.availability ? 'available' : 'unavailable'
-                  }`}
-              >
+              {product.images && product.images.length > 0 ? <img src={product.images[0]} alt={product.name} /> : <div className="no-image">No image</div>}
+              <div className={`availability-badge ${product.availability ? 'available' : 'unavailable'}`}>
                 {product.availability ? 'Available' : 'Unavailable'}
               </div>
             </div>
@@ -86,38 +64,16 @@ const MyListings = ({ listings, onUpdate }) => {
             <div className="listing-info">
               <h3>{product.name}</h3>
               <p className="listing-category">{product.category}</p>
-              <p className="listing-price">₹{product.pricePerDay}/day</p>
-              <p className="listing-description">
-                {product.description.substring(0, 80)}...
-              </p>
+              <p className="listing-price">Rs {product.pricePerDay}/day</p>
+              <p className="listing-description">{product.description.substring(0, 80)}...</p>
 
               <div className="listing-actions">
-                <button
-                  onClick={() => navigate(`/products/${product._id}`)}
-                  className="btn-view"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => navigate(`/edit-product/${product._id}`)}
-                  className="btn-edit"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => toggleAvailability(product)}
-                  className="btn-toggle"
-                  disabled={loading}
-                >
+                <button onClick={() => navigate(`/products/${product._id}`)} className="btn-view">View</button>
+                <button onClick={() => navigate(`/edit-product/${product._id}`)} className="btn-edit">Edit</button>
+                <button onClick={() => toggleAvailability(product)} className="btn-toggle" disabled={loading}>
                   {product.availability ? 'Mark Unavailable' : 'Mark Available'}
                 </button>
-                <button
-                  onClick={() => handleDelete(product._id)}
-                  className="btn-delete"
-                  disabled={loading}
-                >
-                  Delete
-                </button>
+                <button onClick={() => handleDelete(product._id)} className="btn-delete" disabled={loading}>Delete</button>
               </div>
             </div>
           </div>
