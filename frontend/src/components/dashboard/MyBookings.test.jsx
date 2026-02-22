@@ -5,6 +5,7 @@ import MyBookings from './MyBookings';
 const mockComplete = vi.fn();
 const mockCancel = vi.fn();
 const mockUpdate = vi.fn();
+const mockGetReceipt = vi.fn();
 const mockGetByProduct = vi.fn();
 const mockUser = { _id: 'u1', name: 'Test User' };
 
@@ -13,6 +14,7 @@ vi.mock('../../services/api', () => ({
     complete: (...args) => mockComplete(...args),
     cancel: (...args) => mockCancel(...args),
     update: (...args) => mockUpdate(...args),
+    getReceipt: (...args) => mockGetReceipt(...args),
   },
   reviewAPI: {
     getByProduct: (...args) => mockGetByProduct(...args),
@@ -35,6 +37,7 @@ describe('MyBookings component', () => {
     mockComplete.mockResolvedValue({ data: { success: true } });
     mockCancel.mockResolvedValue({ data: { success: true } });
     mockUpdate.mockResolvedValue({ data: { success: true } });
+    mockGetReceipt.mockResolvedValue({ data: { success: true, data: {} } });
     mockGetByProduct.mockResolvedValue({ data: { data: [] } });
     vi.spyOn(window, 'alert').mockImplementation(() => {});
     vi.spyOn(window, 'confirm').mockReturnValue(true);

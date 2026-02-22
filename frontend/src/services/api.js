@@ -76,6 +76,7 @@ export const bookingAPI = {
   complete: (id) => api.patch(`/bookings/${id}/complete`),
   cancel: (id) => api.delete(`/bookings/${id}`),
   confirm: (data) => api.post('/bookings/confirm', data),
+  getReceipt: (id) => api.get(`/bookings/${id}/receipt`),
 };
 
 // Dashboard API
