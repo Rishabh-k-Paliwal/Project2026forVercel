@@ -1,0 +1,6 @@
+﻿flowchart TB
+    E2E[End to End Tests<br/>Jest plus Supertest<br/>Few high value flows]
+    INTEG[Integration and Controller Tests<br/>Conflict and status transitions<br/>Moderate count]
+    UNIT[Unit and Component Tests<br/>Vitest plus RTL<br/>Largest and fastest layer]
+
+    E2E --> INTEG --> UNIT

@@ -1,0 +1,16 @@
+﻿flowchart TD
+    A[Client requests dashboard] --> B[GET /api/dashboard]
+    B --> C[Auth middleware validates JWT]
+    C --> D[Dashboard controller]
+
+    D --> E[Query my bookings]
+    D --> F[Query my listings]
+    D --> G[Query bookings on my listings]
+
+    E --> H[Compute booking stats]
+    F --> H
+    G --> H
+
+    H --> I[Build consolidated response object]
+    I --> J[Return dashboard payload]
+    J --> K[Frontend renders tabs/cards/tables]

@@ -1,0 +1,16 @@
+﻿stateDiagram-v2
+    [*] --> Pending: Booking Created
+
+    Pending --> Cancelled: User cancels before payment
+    Pending --> Confirmed: Payment verified
+
+    Confirmed --> Active: Start date reached / handover
+    Confirmed --> Cancelled: Cancellation policy allows
+
+    Active --> Completed: End date + return confirmed
+    Active --> Cancelled: Exceptional cancellation
+
+    Cancelled --> Refunded: If payment captured
+    Refunded --> [*]
+
+    Completed --> [*]

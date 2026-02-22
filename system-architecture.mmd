@@ -1,0 +1,27 @@
+﻿flowchart LR
+    U[User Browser] --> FE[Frontend SPA<br/>React + React Router + Axios]
+
+    subgraph Frontend
+      FE --> AUTHCTX[Auth Context<br/>Token State]
+      FE --> UI[Pages + Components<br/>Products, Booking, Dashboard, Reviews]
+      UI --> API_CLIENT[API Service Layer<br/>Axios Interceptors]
+      AUTHCTX --> API_CLIENT
+    end
+
+    API_CLIENT -->|HTTPS /api| BE[Backend API<br/>Node.js + Express]
+
+    subgraph Backend
+      BE --> MW[Middleware Layer<br/>CORS, Validation, Auth JWT, Role Check]
+      MW --> ROUTES[Routes<br/>auth, products, bookings, dashboard]
+      ROUTES --> CTRL[Controllers<br/>Auth, Product, Booking, Dashboard, Review]
+      CTRL --> SVC[Services<br/>Payment, Notification]
+      CTRL --> ODM[Mongoose ODM]
+    end
+
+    ODM --> DB[(MongoDB<br/>Users, Products, Bookings, Reviews)]
+
+    SVC --> RP[Razorpay<br/>Order + Payment Confirmation]
+    SVC --> MAIL[Nodemailer SMTP<br/>Email Notifications]
+
+    BE --> TEST[Test Layer<br/>Jest + Supertest]
+    FE --> FTEST[Frontend Tests<br/>Vitest + React Testing Library]

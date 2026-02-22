@@ -1,0 +1,15 @@
+﻿flowchart LR
+    UI[React UI Components] --> API[API Service Layer]
+    API --> RT[Express Routes]
+    RT --> MW[Middleware]
+    MW --> CT[Controllers]
+    CT --> SRV[Services]
+    CT --> ODM[Mongoose Models]
+    ODM --> DB[(MongoDB)]
+
+    SRV --> PAY[Razorpay Service]
+    SRV --> NOTI[Notification Service]
+
+    TESTF[Frontend Tests] --> UI
+    TESTB[Backend Tests] --> RT
+    TESTB --> CT

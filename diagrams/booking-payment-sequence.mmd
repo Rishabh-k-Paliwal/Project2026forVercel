@@ -1,0 +1,29 @@
+﻿sequenceDiagram
+    actor User
+    participant FE as Frontend
+    participant BE as Backend API
+    participant DB as MongoDB
+    participant RP as Razorpay
+    participant NS as Notification Service
+
+    User->>FE: Submit booking request
+    FE->>BE: POST /api/bookings
+    BE->>DB: Validate product + date conflict
+    alt Conflict exists
+        BE-->>FE: 409 Date overlap
+        FE-->>User: Show conflict error
+    else No conflict
+        BE->>DB: Create pending booking
+        BE->>RP: Create payment order
+        RP-->>BE: order_id + amount
+        BE-->>FE: Booking + order details
+        FE->>RP: Open checkout
+        User->>RP: Complete payment
+        RP-->>FE: payment_id/order_id/signature
+        FE->>BE: POST /api/bookings/confirm
+        BE->>BE: Verify HMAC signature
+        BE->>DB: Update booking confirmed + payment completed
+        BE->>NS: Trigger confirmation notification
+        BE-->>FE: Success response
+        FE-->>User: Show booking confirmed
+    end

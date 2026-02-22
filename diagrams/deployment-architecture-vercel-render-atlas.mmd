@@ -1,0 +1,17 @@
+﻿flowchart LR
+    U[User Browser] --> V[Vercel Frontend<br/>React SPA]
+
+    V -->|HTTPS API Calls| R[Render Backend<br/>Node and Express]
+
+    R -->|Mongoose Connection| M[(MongoDB Atlas<br/>Users Products Bookings Reviews)]
+
+    R --> P[Razorpay<br/>Payment Gateway]
+    R --> N[Nodemailer SMTP<br/>Email Notifications]
+
+    subgraph Env[Environment Configuration]
+      EV[Frontend Vars<br/>REACT_APP_BACKEND_URL<br/>REACT_APP_RAZORPAY_KEY_ID]
+      ER[Backend Vars<br/>MONGO_URI JWT_SECRET<br/>RAZORPAY_KEY_ID and SECRET FRONTEND_URL]
+    end
+
+    EV -.-> V
+    ER -.-> R
