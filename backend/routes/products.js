@@ -24,11 +24,11 @@ router.post('/:id/reviews', protect, reviewValidation, validate, addReview);
 // Single product (must be after reviews routes)
 router.get('/:id', getProduct);
 
-// Protected routes (owner/admin only)
+// Protected routes (any authenticated user can list; admin still has full access)
 router.post(
   '/',
   protect,
-  authorize('owner', 'admin'),
+  authorize('user', 'owner', 'admin'),
   productValidation,
   validate,
   createProduct
@@ -37,14 +37,14 @@ router.post(
 router.put(
   '/:id',
   protect,
-  authorize('owner', 'admin'),
+  authorize('user', 'owner', 'admin'),
   updateProduct
 );
 
 router.delete(
   '/:id',
   protect,
-  authorize('owner', 'admin'),
+  authorize('user', 'owner', 'admin'),
   deleteProduct
 );
 

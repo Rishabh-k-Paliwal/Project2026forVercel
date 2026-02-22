@@ -5,6 +5,7 @@ const {
   getMyBookings,
   getBooking,
   updateBooking,
+  completeBooking,
   cancelBooking,
   paymentWebhook,
   confirmPayment,
@@ -23,6 +24,7 @@ router.post('/', protect, bookingValidation, validate, createBooking);
 router.get('/my-bookings', protect, getMyBookings);
 router.get('/:id', protect, getBooking);
 router.put('/:id', protect, updateBooking);
+router.patch('/:id/complete', protect, completeBooking);
 router.delete('/:id', protect, cancelBooking);
 
 module.exports = router;
