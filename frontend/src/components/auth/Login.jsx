@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
@@ -31,38 +31,24 @@ const Login = () => {
 
         {error && (
           <div className="error-alert">
-            <span>⚠️</span> {error}
+            <span>!</span> {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-            />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" required />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-            />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" required />
           </div>
-          <button type="submit" className="btn-auth">
-            Sign In
-          </button>
+          <button type="submit" className="btn-auth">Sign In</button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account?
+          Do not have an account?
           <Link to="/register" className="auth-link">Create one</Link>
         </div>
       </div>
