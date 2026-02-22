@@ -5,21 +5,15 @@ import './Products.css';
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate(`/products/${product._id}`);
-  };
-
   return (
-    <div className="product-card" onClick={handleClick}>
+    <div className="product-card" onClick={() => navigate(`/products/${product._id}`)}>
       <div className="product-image">
         {product.images && product.images.length > 0 ? (
           <img src={product.images[0]} alt={product.name} />
         ) : (
-          <div className="no-image">📦</div>
+          <div className="no-image">No image</div>
         )}
-        {!product.availability && (
-          <div className="unavailable-badge">Not Available</div>
-        )}
+        {!product.availability && <div className="unavailable-badge">Not Available</div>}
       </div>
 
       <div className="product-info">
@@ -29,12 +23,10 @@ const ProductCard = ({ product }) => {
           {product.description.substring(0, 80)}
           {product.description.length > 80 && '...'}
         </p>
-        <div className="product-location">
-          📍 {product.location?.address || 'Location not specified'}
-        </div>
+        <p className="product-location">{product.location?.address || 'Location not specified'}</p>
         <div className="product-footer">
-          <div className="product-price">₹{product.pricePerDay}/day</div>
-          <button className="btn-view-details">View Details</button>
+          <div className="product-price">Rs {product.pricePerDay}/day</div>
+          <button className="btn-view-product">View Details</button>
         </div>
       </div>
     </div>

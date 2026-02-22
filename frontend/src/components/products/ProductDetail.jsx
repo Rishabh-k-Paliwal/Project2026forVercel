@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { productAPI, bookingAPI, reviewAPI } from '../../services/api';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { bookingAPI, productAPI, reviewAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import BookingForm from '../booking/BookingForm';
-import ReviewsList from './ReviewsList';
 import ReviewForm from './ReviewForm';
+import ReviewsList from './ReviewsList';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -38,9 +38,7 @@ const ProductDetail = () => {
   }, [fetchProduct]);
 
   useEffect(() => {
-    if (product?.images?.length > 0) {
-      setMainImage(product.images[0]);
-    }
+    if (product?.images?.length > 0) setMainImage(product.images[0]);
   }, [product]);
 
   useEffect(() => {
@@ -49,9 +47,7 @@ const ProductDetail = () => {
         setCanReview(false);
         return;
       }
-
       try {
-        // Check user's completed bookings for this product
         const resp = await bookingAPI.getMyBookings();
         const bookings = resp.data.data || [];
         const completed = bookings.find(
@@ -61,10 +57,8 @@ const ProductDetail = () => {
               (b.product && b.product.toString && b.product.toString() === product._id)) &&
             b.status === 'completed'
         );
-
         setCanReview(!!completed);
 
-        // Check if user has already left a review
         const reviewsResp = await reviewAPI.getByProduct(product._id, { page: 1, limit: 100 });
         const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
         const myReview = (reviewsResp.data.data || []).find((r) => r.user && r.user.name === currentUser.name);
@@ -77,20 +71,6 @@ const ProductDetail = () => {
 
     checkCanReview();
   }, [isAuthenticated, product, reviewRefreshKey]);
-
-  const onReviewSubmitted = () => {
-    setReviewRefreshKey((k) => k + 1);
-    setHasReviewed(true);
-    setCanReview(false);
-  };
-
-  const handleBookNow = () => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    setShowBookingForm(true);
-  };
 
   if (loading) {
     return (
@@ -106,25 +86,20 @@ const ProductDetail = () => {
       <div className="error-container">
         <h2>Error</h2>
         <p>{error || 'Product not found'}</p>
-        <button onClick={() => navigate('/')} className="btn-primary">
-          Back to Products
-        </button>
+        <button onClick={() => navigate('/')} className="btn-primary">Back to Products</button>
       </div>
     );
   }
 
   return (
     <div className="product-detail-container">
-      <button onClick={() => navigate(-1)} className="btn-back">
-        ← Back
-      </button>
+      <button onClick={() => navigate(-1)} className="btn-back">Back</button>
 
       <div className="product-detail-grid">
         <div className="product-images">
           {product.images && product.images.length > 0 ? (
             <>
               <img src={mainImage} alt={product.name} className="main-product-image" />
-
               <div className="thumbnails">
                 {product.images.map((imgUrl, idx) => (
                   <img
@@ -139,7 +114,7 @@ const ProductDetail = () => {
               </div>
             </>
           ) : (
-            <div className="no-image-large">📦</div>
+            <div className="no-image-large">No image</div>
           )}
         </div>
 
@@ -149,22 +124,18 @@ const ProductDetail = () => {
 
           <div className="product-price-section">
             <span className="price-label">Rental Price:</span>
-            <span className="price-value">₹{product.pricePerDay}/day</span>
+            <span className="price-value">Rs {product.pricePerDay}/day</span>
           </div>
 
           {product.reviewsCount > 0 && (
             <div className="product-rating">
-              <span className="rating-stars">{'★'.repeat(Math.round(product.averageRating))}{'☆'.repeat(5 - Math.round(product.averageRating))}</span>
+              <span className="rating-stars">{'*'.repeat(Math.round(product.averageRating))}</span>
               <span className="rating-info">{product.averageRating} ({product.reviewsCount})</span>
             </div>
           )}
 
           <div className="product-availability">
-            {product.availability ? (
-              <span className="status-available">✓ Available</span>
-            ) : (
-              <span className="status-unavailable">✗ Not Available</span>
-            )}
+            {product.availability ? <span className="status-available">Available</span> : <span className="status-unavailable">Not Available</span>}
           </div>
 
           <div className="product-section">
@@ -174,7 +145,7 @@ const ProductDetail = () => {
 
           <div className="product-section">
             <h3>Location</h3>
-            <p>📍 {product.location?.address}</p>
+            <p>{product.location?.address}</p>
           </div>
 
           {product.specs && Object.keys(product.specs).length > 0 && (
@@ -182,9 +153,7 @@ const ProductDetail = () => {
               <h3>Specifications</h3>
               <ul className="specs-list">
                 {Object.entries(product.specs).map(([key, value]) => (
-                  <li key={key}>
-                    <strong>{key}:</strong> {value}
-                  </li>
+                  <li key={key}><strong>{key}:</strong> {value}</li>
                 ))}
               </ul>
             </div>
@@ -197,29 +166,30 @@ const ProductDetail = () => {
           </div>
 
           {product.availability && (
-            <button onClick={handleBookNow} className="btn-book-now">
+            <button onClick={() => (isAuthenticated ? setShowBookingForm(true) : navigate('/login'))} className="btn-book-now">
               Book Now
             </button>
           )}
         </div>
       </div>
 
-      {showBookingForm && (
-        <BookingForm
-          product={product}
-          onClose={() => setShowBookingForm(false)}
-        />
-      )}
+      {showBookingForm && <BookingForm product={product} onClose={() => setShowBookingForm(false)} />}
 
       <section className="product-reviews container">
         <h2>Customer Reviews</h2>
 
         {canReview && !hasReviewed && (
-          <ReviewForm productId={product._id} onSubmitted={onReviewSubmitted} />
+          <ReviewForm
+            productId={product._id}
+            onSubmitted={() => {
+              setReviewRefreshKey((k) => k + 1);
+              setHasReviewed(true);
+              setCanReview(false);
+            }}
+          />
         )}
-
         {!canReview && !hasReviewed && isAuthenticated && (
-          <p className="small-note">You can leave a review after you complete a booking for this product.</p>
+          <p className="small-note">You can leave a review after completing a booking for this product.</p>
         )}
 
         <ReviewsList productId={product._id} refreshKey={reviewRefreshKey} />

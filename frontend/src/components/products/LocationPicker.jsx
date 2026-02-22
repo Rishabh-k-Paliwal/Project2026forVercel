@@ -2,21 +2,16 @@ import React, { useState } from 'react';
 import './LocationPicker.css';
 
 const LocationPicker = ({ onSelect, onClose }) => {
-  const [method, setMethod] = useState('current'); // 'current', 'manual', 'city'
+  const [method, setMethod] = useState('current');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    lat: '',
-    lng: '',
-    city: '',
-    radius: 50,
-  });
+  const [formData, setFormData] = useState({ lat: '', lng: '', city: '', radius: 50 });
 
   const popularCities = [
-    { name: 'Mumbai', lat: 19.0760, lng: 72.8777 },
-    { name: 'Delhi', lat: 28.6139, lng: 77.2090 },
+    { name: 'Mumbai', lat: 19.076, lng: 72.8777 },
+    { name: 'Delhi', lat: 28.6139, lng: 77.209 },
     { name: 'Bangalore', lat: 12.9716, lng: 77.5946 },
-    { name: 'Hyderabad', lat: 17.3850, lng: 78.4867 },
+    { name: 'Hyderabad', lat: 17.385, lng: 78.4867 },
     { name: 'Chennai', lat: 13.0827, lng: 80.2707 },
     { name: 'Kolkata', lat: 22.5726, lng: 88.3639 },
     { name: 'Pune', lat: 18.5204, lng: 73.8567 },
@@ -31,22 +26,20 @@ const LocationPicker = ({ onSelect, onClose }) => {
 
     setLoading(true);
     setError('');
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const location = {
+        setLoading(false);
+        onSelect({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
           radius: formData.radius,
           address: 'Your current location',
-        };
-        setLoading(false);
-        onSelect(location);
+        });
       },
-      (error) => {
+      (geoError) => {
         setLoading(false);
         setError('Unable to get your location. Please try manual entry.');
-        console.error('Geolocation error:', error);
+        console.error('Geolocation error:', geoError);
       }
     );
   };
@@ -57,23 +50,7 @@ const LocationPicker = ({ onSelect, onClose }) => {
       setError('Please enter both latitude and longitude');
       return;
     }
-
-    const location = {
-      lat: parseFloat(formData.lat),
-      lng: parseFloat(formData.lng),
-      radius: formData.radius,
-    };
-    onSelect(location);
-  };
-
-  const handleCitySelect = (city) => {
-    const location = {
-      lat: city.lat,
-      lng: city.lng,
-      radius: formData.radius,
-      address: city.name,
-    };
-    onSelect(location);
+    onSelect({ lat: parseFloat(formData.lat), lng: parseFloat(formData.lng), radius: formData.radius });
   };
 
   return (
@@ -81,62 +58,32 @@ const LocationPicker = ({ onSelect, onClose }) => {
       <div className="location-picker-modal" onClick={(e) => e.stopPropagation()}>
         <div className="location-picker-header">
           <h2>Select Location</h2>
-          <button onClick={onClose} className="btn-close">✕</button>
+          <button onClick={onClose} className="btn-close">x</button>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
-        {/* Method Tabs */}
         <div className="location-tabs">
-          <button
-            className={`tab ${method === 'current' ? 'active' : ''}`}
-            onClick={() => setMethod('current')}
-          >
-            📍 Current Location
-          </button>
-          <button
-            className={`tab ${method === 'city' ? 'active' : ''}`}
-            onClick={() => setMethod('city')}
-          >
-            🏙️ Select City
-          </button>
-          <button
-            className={`tab ${method === 'manual' ? 'active' : ''}`}
-            onClick={() => setMethod('manual')}
-          >
-            ✏️ Manual Entry
-          </button>
+          <button className={`tab ${method === 'current' ? 'active' : ''}`} onClick={() => setMethod('current')}>Current</button>
+          <button className={`tab ${method === 'city' ? 'active' : ''}`} onClick={() => setMethod('city')}>City</button>
+          <button className={`tab ${method === 'manual' ? 'active' : ''}`} onClick={() => setMethod('manual')}>Manual</button>
         </div>
 
-        {/* Current Location */}
         {method === 'current' && (
           <div className="location-method">
-            <p className="method-description">
-              Use your device's GPS to find products near you
-            </p>
-            <button
-              onClick={handleCurrentLocation}
-              className="btn-get-location"
-              disabled={loading}
-            >
-              {loading ? 'Getting Location...' : '📍 Use My Current Location'}
+            <p className="method-description">Use your device location to discover nearby products.</p>
+            <button onClick={handleCurrentLocation} className="btn-get-location" disabled={loading}>
+              {loading ? 'Getting location...' : 'Use my current location'}
             </button>
           </div>
         )}
 
-        {/* City Selection */}
         {method === 'city' && (
           <div className="location-method">
-            <p className="method-description">
-              Choose from popular cities in India
-            </p>
+            <p className="method-description">Choose a city in India.</p>
             <div className="cities-grid">
               {popularCities.map((city) => (
-                <button
-                  key={city.name}
-                  onClick={() => handleCitySelect(city)}
-                  className="city-button"
-                >
+                <button key={city.name} onClick={() => onSelect({ lat: city.lat, lng: city.lng, radius: formData.radius, address: city.name })} className="city-button">
                   {city.name}
                 </button>
               ))}
@@ -144,66 +91,32 @@ const LocationPicker = ({ onSelect, onClose }) => {
           </div>
         )}
 
-        {/* Manual Entry */}
         {method === 'manual' && (
           <div className="location-method">
-            <p className="method-description">
-              Enter coordinates manually (You can get them from Google Maps)
-            </p>
+            <p className="method-description">Enter latitude and longitude manually.</p>
             <form onSubmit={handleManualSubmit} className="manual-form">
               <div className="form-row">
                 <div className="form-group">
                   <label>Latitude</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={formData.lat}
-                    onChange={(e) => setFormData({ ...formData, lat: e.target.value })}
-                    placeholder="e.g., 28.6139"
-                    required
-                  />
+                  <input type="number" step="any" value={formData.lat} onChange={(e) => setFormData({ ...formData, lat: e.target.value })} placeholder="e.g., 28.6139" required />
                 </div>
                 <div className="form-group">
                   <label>Longitude</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={formData.lng}
-                    onChange={(e) => setFormData({ ...formData, lng: e.target.value })}
-                    placeholder="e.g., 77.2090"
-                    required
-                  />
+                  <input type="number" step="any" value={formData.lng} onChange={(e) => setFormData({ ...formData, lng: e.target.value })} placeholder="e.g., 77.2090" required />
                 </div>
               </div>
-              <button type="submit" className="btn-submit">
-                Set Location
-              </button>
+              <button type="submit" className="btn-submit">Set location</button>
             </form>
           </div>
         )}
 
-        {/* Radius Selector */}
         <div className="radius-selector">
           <label>Search Radius: {formData.radius} km</label>
-          <input
-            type="range"
-            min="5"
-            max="100"
-            step="5"
-            value={formData.radius}
-            onChange={(e) => setFormData({ ...formData, radius: parseInt(e.target.value) })}
-            className="radius-slider"
-          />
-          <div className="radius-labels">
-            <span>5 km</span>
-            <span>50 km</span>
-            <span>100 km</span>
-          </div>
+          <input type="range" min="5" max="100" step="5" value={formData.radius} onChange={(e) => setFormData({ ...formData, radius: parseInt(e.target.value, 10) })} className="radius-slider" />
+          <div className="radius-labels"><span>5 km</span><span>50 km</span><span>100 km</span></div>
         </div>
 
-        <div className="location-tip">
-          💡 Tip: Products within the selected radius will be shown first
-        </div>
+        <div className="location-tip">Tip: Products inside the selected radius are prioritized.</div>
       </div>
     </div>
   );

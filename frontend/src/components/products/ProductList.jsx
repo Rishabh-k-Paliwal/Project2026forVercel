@@ -1,19 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { productAPI } from '../../services/api';
-import ProductCard from './ProductCard';
 import LocationPicker from './LocationPicker';
+import ProductCard from './ProductCard';
 import './Products.css';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
-
-  // Search state
   const [searchQuery, setSearchQuery] = useState('');
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -34,14 +30,10 @@ const ProductList = () => {
         }
         response = await productAPI.search(searchParams);
       } else {
-        // Request a high limit to get all products for client-side pagination
         response = await productAPI.getAll({ limit: 1000 });
       }
 
-      // Defensive check for response data
       const productsData = response?.data?.data || [];
-      console.log('Fetched products count:', productsData.length);
-      console.log('Full response:', response?.data);
       setProducts(productsData);
       setCurrentPage(1);
     } catch (err) {
@@ -56,21 +48,6 @@ const ProductList = () => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchProducts();
-  };
-
-  const handleLocationSelect = (location) => {
-    setSelectedLocation(location);
-    setShowLocationPicker(false);
-  };
-
-  const clearLocation = () => {
-    setSelectedLocation(null);
-  };
-
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
@@ -93,44 +70,33 @@ const ProductList = () => {
   return (
     <div className="product-list-container">
       <div className="search-bar-container">
-        <form onSubmit={handleSearch} className="search-form">
+        <form onSubmit={(e) => { e.preventDefault(); fetchProducts(); }} className="search-form">
           <input
             type="text"
-            placeholder="Search for electronics (e.g., laptop, camera, drone)..."
+            placeholder="Search electronics (laptop, camera, drone)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
 
-          <button
-            type="button"
-            onClick={() => setShowLocationPicker(true)}
-            className="btn-location"
-          >
-            📍 {selectedLocation ? 'Change Location' : 'Add Location'}
+          <button type="button" onClick={() => setShowLocationPicker(true)} className="btn-location">
+            {selectedLocation ? 'Change location' : 'Add location'}
           </button>
 
-          <button type="submit" className="btn-search">
-            🔍 Search
-          </button>
+          <button type="submit" className="btn-search">Search</button>
         </form>
 
         {selectedLocation && (
           <div className="selected-location">
-            <span>📍 Near: {selectedLocation.address || `${selectedLocation.lat.toFixed(2)}, ${selectedLocation.lng.toFixed(2)}`}</span>
+            <span>Near: {selectedLocation.address || `${selectedLocation.lat.toFixed(2)}, ${selectedLocation.lng.toFixed(2)}`}</span>
             <span className="radius-info">Within {selectedLocation.radius || 50}km</span>
-            <button type="button" onClick={clearLocation} className="btn-clear-location">
-              ✕
-            </button>
+            <button type="button" onClick={() => setSelectedLocation(null)} className="btn-clear-location">x</button>
           </div>
         )}
       </div>
 
       {showLocationPicker && (
-        <LocationPicker
-          onSelect={handleLocationSelect}
-          onClose={() => setShowLocationPicker(false)}
-        />
+        <LocationPicker onSelect={(location) => { setSelectedLocation(location); setShowLocationPicker(false); }} onClose={() => setShowLocationPicker(false)} />
       )}
 
       {error && <div className="error-message">{error}</div>}
@@ -138,12 +104,12 @@ const ProductList = () => {
       {products.length === 0 ? (
         <div className="no-products">
           <h3>No products found</h3>
-          <p>Try adjusting your search</p>
+          <p>Try adjusting your search filters.</p>
         </div>
       ) : (
         <>
           <div className="results-info">
-            <p>Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, products.length)} of {products.length} products (Page {currentPage} of {totalPages})</p>
+            <p>Showing {indexOfFirstItem + 1}-{Math.min(indexOfLastItem, products.length)} of {products.length} products</p>
           </div>
 
           <div className="products-grid">
@@ -154,45 +120,24 @@ const ProductList = () => {
 
           {totalPages > 1 && (
             <div className="pagination">
-              <button
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="pagination-btn"
-              >
-                ← Previous
-              </button>
-
+              <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} className="pagination-btn">Previous</button>
               <div className="pagination-numbers">
                 {[...Array(totalPages)].map((_, index) => {
                   const pageNum = index + 1;
-                  if (
-                    pageNum === 1 ||
-                    pageNum === totalPages ||
-                    (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
-                  ) {
+                  if (pageNum === 1 || pageNum === totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
                     return (
-                      <button
-                        key={pageNum}
-                        onClick={() => paginate(pageNum)}
-                        className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}
-                      >
+                      <button key={pageNum} onClick={() => paginate(pageNum)} className={`pagination-number ${currentPage === pageNum ? 'active' : ''}`}>
                         {pageNum}
                       </button>
                     );
-                  } else if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                  }
+                  if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
                     return <span key={pageNum} className="pagination-ellipsis">...</span>;
                   }
                   return null;
                 })}
               </div>
-
-              <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="pagination-btn"
-              >
-                Next →
-              </button>
+              <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} className="pagination-btn">Next</button>
             </div>
           )}
         </>
