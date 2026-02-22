@@ -46,6 +46,15 @@ const bookingSchema = new mongoose.Schema(
       enum: ['pending', 'completed', 'failed', 'refunded'],
       default: 'pending',
     },
+    paymentTransactionId: {
+      type: String,
+    },
+    receiptNumber: {
+      type: String,
+    },
+    receiptGeneratedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

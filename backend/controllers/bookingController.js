@@ -5,6 +5,34 @@ const crypto = require('crypto');
 const razorpay = require('../config/payment');
 const { sendBookingNotification } = require('../services/notificationService');
 
+const createReceiptNumber = (bookingId, receiptDate = new Date()) => {
+  const datePart = receiptDate.toISOString().slice(0, 10).replace(/-/g, '');
+  const bookingPart = bookingId.toString().slice(-6).toUpperCase();
+  return `RCT-${datePart}-${bookingPart}`;
+};
+
+const ensureReceiptForBooking = (booking, paymentTransactionId = null) => {
+  if (paymentTransactionId) {
+    booking.paymentTransactionId = paymentTransactionId;
+  }
+
+  if (!booking.receiptNumber) {
+    booking.receiptNumber = createReceiptNumber(booking._id);
+  }
+
+  if (!booking.receiptGeneratedAt) {
+    booking.receiptGeneratedAt = new Date();
+  }
+};
+
+const toReceiptPayload = (booking) => ({
+  bookingId: booking._id,
+  receiptNumber: booking.receiptNumber,
+  receiptGeneratedAt: booking.receiptGeneratedAt,
+  paymentTransactionId: booking.paymentTransactionId || null,
+  amount: booking.totalPrice,
+});
+
 const findDateConflict = async ({ productId, startDate, endDate, excludeBookingId = null }) => {
   const query = {
     product: productId,
@@ -122,12 +150,17 @@ const confirmPayment = async (req, res) => {
 
     booking.status = 'confirmed';
     booking.paymentStatus = 'completed';
+    ensureReceiptForBooking(booking, razorpay_payment_id);
     await booking.save();
 
     const user = await User.findById(booking.user).select('name email phone');
     await sendBookingNotification(booking, user, 'confirmed');
 
-    res.json({ success: true, data: booking });
+    res.json({
+      success: true,
+      data: booking,
+      receipt: toReceiptPayload(booking),
+    });
   } catch (error) {
     console.error('Confirm payment error:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -162,6 +195,39 @@ const getBooking = async (req, res) => {
     }
 
     res.json({ success: true, data: booking });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// @desc    Get booking receipt
+// @route   GET /api/bookings/:id/receipt
+// @access  Private
+const getBookingReceipt = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('product').populate('user', 'name email phone');
+
+    if (!booking) {
+      return res.status(404).json({ success: false, error: 'Booking not found' });
+    }
+
+    const bookingUserId = booking.user._id ? booking.user._id.toString() : booking.user.toString();
+    if (bookingUserId !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, error: 'Not authorized to view this receipt' });
+    }
+
+    if (booking.paymentStatus !== 'completed') {
+      return res.status(400).json({ success: false, error: 'Receipt is available only after completed payment' });
+    }
+
+    ensureReceiptForBooking(booking);
+    await booking.save();
+
+    res.json({
+      success: true,
+      data: booking,
+      receipt: toReceiptPayload(booking),
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -297,12 +363,14 @@ const paymentWebhook = async (req, res) => {
     const { event, payload } = req.body;
 
     if (event === 'payment.captured') {
-      const bookingId = payload.payment.entity.notes.bookingId;
+      const paymentEntity = payload?.payment?.entity;
+      const bookingId = paymentEntity?.notes?.bookingId;
       const booking = await Booking.findById(bookingId);
 
       if (booking) {
         booking.status = 'confirmed';
         booking.paymentStatus = 'completed';
+        ensureReceiptForBooking(booking, paymentEntity?.id || null);
         await booking.save();
         await sendBookingNotification(booking, null, 'confirmed');
       }
@@ -319,6 +387,7 @@ module.exports = {
   createBooking,
   getMyBookings,
   getBooking,
+  getBookingReceipt,
   updateBooking,
   completeBooking,
   cancelBooking,
