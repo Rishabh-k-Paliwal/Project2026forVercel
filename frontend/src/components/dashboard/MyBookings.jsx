@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { bookingAPI, reviewAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import ReviewForm from '../products/ReviewForm';
+import { buildReceiptData, printReceipt } from '../../utils/receipt';
 import './Dashboard.css';
 
 const MyBookings = ({ bookings, onUpdate }) => {
@@ -88,6 +89,21 @@ const MyBookings = ({ bookings, onUpdate }) => {
     }
   };
 
+  const handlePrintReceipt = async (booking) => {
+    try {
+      const receipt = buildReceiptData({
+        booking,
+        productName: booking.product?.name,
+        customerName: user?.name,
+        customerEmail: user?.email,
+      });
+
+      printReceipt(receipt);
+    } catch (error) {
+      alert(error.response?.data?.error || 'Unable to print receipt');
+    }
+  };
+
   if (bookings.length === 0) {
     return (
       <div className="no-data">
@@ -130,6 +146,7 @@ const MyBookings = ({ bookings, onUpdate }) => {
                   <div className="detail-row"><span className="label">End Date:</span><span>{new Date(booking.endDate).toLocaleDateString()}</span></div>
                   <div className="detail-row"><span className="label">Total Price:</span><span className="price">Rs {booking.totalPrice}</span></div>
                   <div className="detail-row"><span className="label">Delivery Address:</span><span>{booking.location?.address}</span></div>
+                  {booking.receiptNumber && <div className="detail-row"><span className="label">Receipt Number:</span><span>{booking.receiptNumber}</span></div>}
                 </div>
 
                 <div className="booking-actions">
@@ -164,6 +181,12 @@ const MyBookings = ({ bookings, onUpdate }) => {
                         <span className="small-note">Already reviewed</span>
                       )}
                     </>
+                  )}
+
+                  {(booking.paymentStatus === 'completed' || booking.receiptNumber) && (
+                    <button onClick={() => handlePrintReceipt(booking)} className="btn-view">
+                      Print Receipt
+                    </button>
                   )}
                 </div>
               </>
