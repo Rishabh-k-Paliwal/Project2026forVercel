@@ -18,7 +18,7 @@ ________________________________________
 ✨ Features
 🔐 Authentication & Authorization
 •	JWT-based secure authentication
-•	Role-based access control (User, Owner, Admin)
+•	Role-based access control (User, Owner)
 •	Password encryption with bcrypt
 •	Protected routes and API endpoints
 •	Session management with token expiration
@@ -70,9 +70,7 @@ o	Analytics dashboard
 🔔 Notifications
 •	Email notifications via Nodemailer 
 o	Booking confirmations
-o	Payment receipts
 o	Status updates
-•	SMS notifications via Twilio (optional)
 •	Real-time booking alerts
 🔍 Search & Filter
 •	Full-text product search
@@ -107,9 +105,7 @@ Bcrypt	Password hashing	2.4.3
 Third-Party Services
 Service	Purpose
 Razorpay	Payment processing
-Google Maps API	Location services
 Nodemailer	Email notifications
-Twilio	SMS notifications
 MongoDB Atlas	Cloud database
 DevOps & Deployment
 Platform	Purpose
@@ -144,6 +140,7 @@ ________________________________________
 Sequence diagram
  
 Request Flow Example (Booking a Product)
+
 1. User clicks "Book Now"
    ↓
 2. Frontend validates dates & address
@@ -191,9 +188,8 @@ Required API Keys
 You'll need accounts and API keys for:
 1.	MongoDB Atlas - Sign up
 2.	Razorpay - Sign up
-3.	Google Cloud (for Maps API) - Sign up
-4.	Gmail (for email notifications)
-5.	Twilio (optional, for SMS) - Sign up
+3.	Gmail (for email notifications)
+
 ________________________________________
 📦 Installation
 1. Clone the Repository
