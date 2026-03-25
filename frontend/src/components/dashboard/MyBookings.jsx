@@ -20,7 +20,7 @@ const MyBookings = ({ bookings, onUpdate }) => {
     const check = async () => {
       if (!user) return;
       setCheckingReviews(true);
-      const completedBookings = bookings.filter((b) => b.status === 'completed');
+      const completedBookings = bookings.filter((b) => (b.status || '').toLowerCase() === 'completed');
       const map = {};
       for (const b of completedBookings) {
         try {
@@ -117,11 +117,13 @@ const MyBookings = ({ bookings, onUpdate }) => {
     <div className="bookings-container">
       <div className="dashboard-header-mini"><h2>My Bookings</h2></div>
       <div className="bookings-list">
-        {bookings.map((booking) => (
-          <div key={booking._id} className="booking-card">
+        {bookings.map((booking) => {
+          const bookingStatus = (booking.status || '').toLowerCase();
+          return (
+            <div key={booking._id} className="booking-card">
             <div className="booking-header">
               <h3>{booking.product?.name}</h3>
-              <span className={`status-badge status-${booking.status}`}>{booking.status}</span>
+              <span className={`status-badge status-${bookingStatus}`}>{booking.status}</span>
             </div>
 
             {editingBooking === booking._id ? (
@@ -150,7 +152,7 @@ const MyBookings = ({ bookings, onUpdate }) => {
                 </div>
 
                 <div className="booking-actions">
-                  {booking.status === 'pending' && (
+                  {bookingStatus === 'pending' && (
                     <>
                       <button
                         onClick={() => {
@@ -165,13 +167,19 @@ const MyBookings = ({ bookings, onUpdate }) => {
                     </>
                   )}
 
-                  {(booking.status === 'confirmed' || booking.status === 'active') && (
-                    <button onClick={() => handleComplete(booking._id)} className="btn-save" disabled={loading}>
-                      Mark Completed
-                    </button>
+                  {(bookingStatus === 'confirmed' || bookingStatus === 'active') && (
+                    <>
+                      {!booking.renterCompleted ? (
+                        <button onClick={() => handleComplete(booking._id)} className="btn-save" disabled={loading}>
+                          Mark Completed
+                        </button>
+                      ) : !booking.ownerCompleted ? (
+                        <span className="small-note">Waiting for owner confirmation</span>
+                      ) : null}
+                    </>
                   )}
 
-                  {booking.status === 'completed' && (
+                  {bookingStatus === 'completed' && (
                     <>
                       {checkingReviews ? (
                         <span className="small-note">Checking review...</span>
@@ -191,8 +199,9 @@ const MyBookings = ({ bookings, onUpdate }) => {
                 </div>
               </>
             )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
 
       {showReviewModal && (

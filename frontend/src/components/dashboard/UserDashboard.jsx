@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { dashboardAPI } from '../../services/api';
+import { dashboardAPI, bookingAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import MyBookings from './MyBookings';
 import MyListings from './MyListings';
@@ -11,6 +11,7 @@ const UserDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('bookings');
+  const [ownerActionLoadingId, setOwnerActionLoadingId] = useState(null);
   const hasListings = (dashboardData?.myListings?.length || 0) > 0;
 
   const fetchDashboard = async () => {
@@ -29,6 +30,18 @@ const UserDashboard = () => {
   useEffect(() => {
     fetchDashboard();
   }, []);
+
+  const handleOwnerComplete = async (bookingId) => {
+    try {
+      setOwnerActionLoadingId(bookingId);
+      await bookingAPI.complete(bookingId);
+      await fetchDashboard();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to confirm completion');
+    } finally {
+      setOwnerActionLoadingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -52,7 +65,6 @@ const UserDashboard = () => {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Welcome back, {user?.name}</h1>
-        <p className="user-role">Role: {user?.role}</p>
       </div>
 
       <div className="dashboard-tabs">
@@ -79,6 +91,23 @@ const UserDashboard = () => {
                     <p>Dates: {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}</p>
                     <p>Amount: Rs {booking.totalPrice}</p>
                     <span className={`status-badge status-${booking.status}`}>{booking.status}</span>
+                    <div className="booking-actions" style={{ marginTop: '0.75rem' }}>
+                      {!booking.renterCompleted && booking.status !== 'cancelled' && (
+                        <span className="small-note">Waiting for renter to mark complete</span>
+                      )}
+                      {booking.renterCompleted && !booking.ownerCompleted && booking.status !== 'cancelled' && (
+                        <button
+                          onClick={() => handleOwnerComplete(booking._id)}
+                          className="btn-save"
+                          disabled={ownerActionLoadingId === booking._id}
+                        >
+                          {ownerActionLoadingId === booking._id ? 'Updating...' : 'Owner Confirm Complete'}
+                        </button>
+                      )}
+                      {booking.ownerCompleted && booking.status === 'completed' && (
+                        <span className="small-note">Completed and unlocked</span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
