@@ -4,6 +4,14 @@ const User = require('../models/User');
 const crypto = require('crypto');
 const razorpay = require('../config/payment');
 const { sendBookingNotification } = require('../services/notificationService');
+const {
+  PENDING_BOOKING_EXPIRY_MINUTES,
+  getPendingExpiryDate,
+  isPendingBookingExpired,
+  autoCancelExpiredPendingBookings,
+  getBlockingStatusQueryForDateConflict,
+  getAvailabilityLockStatusQuery,
+} = require('../services/bookingExpiryService');
 
 const createReceiptNumber = (bookingId, receiptDate = new Date()) => {
   const datePart = receiptDate.toISOString().slice(0, 10).replace(/-/g, '');
@@ -34,11 +42,12 @@ const toReceiptPayload = (booking) => ({
 });
 
 const findDateConflict = async ({ productId, startDate, endDate, excludeBookingId = null }) => {
+  const now = new Date();
   const query = {
     product: productId,
-    status: { $in: ['pending', 'confirmed', 'active', 'completed'] },
     startDate: { $lt: new Date(endDate) },
     endDate: { $gt: new Date(startDate) },
+    ...getBlockingStatusQueryForDateConflict(now),
   };
 
   if (excludeBookingId) {
@@ -48,11 +57,23 @@ const findDateConflict = async ({ productId, startDate, endDate, excludeBookingI
   return Booking.findOne(query);
 };
 
+const syncProductAvailability = async (productId) => {
+  const now = new Date();
+  const lockQuery = {
+    product: productId,
+    ...getAvailabilityLockStatusQuery(now),
+  };
+  const hasActiveLock = await Booking.exists(lockQuery);
+  await Product.findByIdAndUpdate(productId, { availability: !hasActiveLock });
+};
+
 // @desc    Create new booking
 // @route   POST /api/bookings
 // @access  Private
 const createBooking = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
+
     const { productId, startDate, endDate, location } = req.body;
     const product = await Product.findById(productId);
 
@@ -90,6 +111,9 @@ const createBooking = async (req, res) => {
       totalPrice,
       location,
       status: 'pending',
+      renterCompleted: false,
+      ownerCompleted: false,
+      pendingExpiresAt: getPendingExpiryDate(),
     });
 
     const order = await razorpay.orders.create({
@@ -104,6 +128,7 @@ const createBooking = async (req, res) => {
 
     booking.paymentId = order.id;
     await booking.save();
+    await syncProductAvailability(productId);
     await sendBookingNotification(booking, req.user, 'created');
 
     res.status(201).json({
@@ -121,6 +146,8 @@ const createBooking = async (req, res) => {
 // @access  Private
 const confirmPayment = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
+
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature, bookingId } = req.body;
 
     if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
@@ -148,10 +175,26 @@ const confirmPayment = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to confirm this booking' });
     }
 
+    if (isPendingBookingExpired(booking)) {
+      booking.status = 'cancelled';
+      booking.paymentStatus = 'failed';
+      await booking.save();
+      await syncProductAvailability(booking.product);
+
+      return res.status(410).json({
+        success: false,
+        error: `Booking expired after ${PENDING_BOOKING_EXPIRY_MINUTES} minutes. Please create a new booking.`,
+      });
+    }
+
     booking.status = 'confirmed';
     booking.paymentStatus = 'completed';
+    booking.renterCompleted = false;
+    booking.ownerCompleted = false;
+    booking.pendingExpiresAt = null;
     ensureReceiptForBooking(booking, razorpay_payment_id);
     await booking.save();
+    await syncProductAvailability(booking.product);
 
     const user = await User.findById(booking.user).select('name email phone');
     await sendBookingNotification(booking, user, 'confirmed');
@@ -172,6 +215,7 @@ const confirmPayment = async (req, res) => {
 // @access  Private
 const getMyBookings = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     const bookings = await Booking.find({ user: req.user.id }).populate('product').sort({ createdAt: -1 });
     res.json({ success: true, data: bookings });
   } catch (error) {
@@ -184,6 +228,7 @@ const getMyBookings = async (req, res) => {
 // @access  Private
 const getBooking = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     const booking = await Booking.findById(req.params.id).populate('product').populate('user', 'name email phone');
 
     if (!booking) {
@@ -205,6 +250,7 @@ const getBooking = async (req, res) => {
 // @access  Private
 const getBookingReceipt = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     const booking = await Booking.findById(req.params.id).populate('product').populate('user', 'name email phone');
 
     if (!booking) {
@@ -238,6 +284,7 @@ const getBookingReceipt = async (req, res) => {
 // @access  Private
 const updateBooking = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     let booking = await Booking.findById(req.params.id);
 
     if (!booking) {
@@ -250,6 +297,16 @@ const updateBooking = async (req, res) => {
 
     if (['confirmed', 'active', 'completed'].includes(booking.status)) {
       return res.status(400).json({ success: false, error: 'Cannot update booking in current status' });
+    }
+
+    if (isPendingBookingExpired(booking)) {
+      booking.status = 'cancelled';
+      booking.paymentStatus = 'failed';
+      await booking.save();
+      return res.status(400).json({
+        success: false,
+        error: `Booking expired after ${PENDING_BOOKING_EXPIRY_MINUTES} minutes and was cancelled`,
+      });
     }
 
     const startDate = req.body.startDate || booking.startDate;
@@ -295,13 +352,22 @@ const updateBooking = async (req, res) => {
 // @access  Private
 const completeBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+    await autoCancelExpiredPendingBookings();
+    const booking = await Booking.findById(req.params.id).populate('product', 'owner');
 
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Booking not found' });
     }
 
-    if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+    const bookingUserId = booking.user.toString();
+    const productId = booking.product?._id || booking.product;
+    const productOwnerId = booking.product?.owner ? booking.product.owner.toString() : null;
+
+    const isRenter = bookingUserId === req.user.id;
+    const isOwner = productOwnerId === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isRenter && !isOwner && !isAdmin) {
       return res.status(403).json({ success: false, error: 'Not authorized to complete this booking' });
     }
 
@@ -313,13 +379,53 @@ const completeBooking = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Cancelled booking cannot be completed' });
     }
 
-    booking.status = 'completed';
+    let message = '';
+
+    if (isAdmin) {
+      booking.renterCompleted = true;
+      booking.ownerCompleted = true;
+      booking.status = 'completed';
+      booking.pendingExpiresAt = null;
+      message = 'Booking marked as completed by admin';
+    } else if (isRenter) {
+      if (booking.renterCompleted) {
+        return res.status(400).json({ success: false, error: 'You already marked this booking as completed' });
+      }
+
+      booking.renterCompleted = true;
+      if (booking.ownerCompleted) {
+        booking.status = 'completed';
+        booking.pendingExpiresAt = null;
+        message = 'Booking completed successfully';
+      } else {
+        booking.status = 'active';
+        message = 'Completion requested. Waiting for owner confirmation';
+      }
+    } else if (isOwner) {
+      if (!booking.renterCompleted) {
+        return res.status(400).json({
+          success: false,
+          error: 'Renter has not marked this booking as completed yet',
+        });
+      }
+
+      if (booking.ownerCompleted) {
+        return res.status(400).json({ success: false, error: 'You already confirmed completion' });
+      }
+
+      booking.ownerCompleted = true;
+      booking.status = 'completed';
+      booking.pendingExpiresAt = null;
+      message = 'Booking completed and product is now available';
+    }
+
     await booking.save();
+    await syncProductAvailability(productId);
 
     res.json({
       success: true,
       data: booking,
-      message: 'Booking marked as completed',
+      message,
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -331,6 +437,7 @@ const completeBooking = async (req, res) => {
 // @access  Private
 const cancelBooking = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     const booking = await Booking.findById(req.params.id);
 
     if (!booking) {
@@ -342,7 +449,11 @@ const cancelBooking = async (req, res) => {
     }
 
     booking.status = 'cancelled';
+    booking.renterCompleted = false;
+    booking.ownerCompleted = false;
+    booking.pendingExpiresAt = null;
     await booking.save();
+    await syncProductAvailability(booking.product);
     await sendBookingNotification(booking, req.user, 'cancelled');
 
     res.json({
@@ -360,6 +471,7 @@ const cancelBooking = async (req, res) => {
 // @access  Public
 const paymentWebhook = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
     const { event, payload } = req.body;
 
     if (event === 'payment.captured') {
@@ -370,8 +482,12 @@ const paymentWebhook = async (req, res) => {
       if (booking) {
         booking.status = 'confirmed';
         booking.paymentStatus = 'completed';
+        booking.renterCompleted = false;
+        booking.ownerCompleted = false;
+        booking.pendingExpiresAt = null;
         ensureReceiptForBooking(booking, paymentEntity?.id || null);
         await booking.save();
+        await syncProductAvailability(booking.product);
         await sendBookingNotification(booking, null, 'confirmed');
       }
     }

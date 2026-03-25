@@ -41,6 +41,17 @@ const bookingSchema = new mongoose.Schema(
     paymentId: {
       type: String,
     },
+    renterCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    ownerCompleted: {
+      type: Boolean,
+      default: false,
+    },
+    pendingExpiresAt: {
+      type: Date,
+    },
     paymentStatus: {
       type: String,
       enum: ['pending', 'completed', 'failed', 'refunded'],
@@ -60,6 +71,8 @@ const bookingSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+bookingSchema.index({ status: 1, pendingExpiresAt: 1 });
 
 // Validate that end date is after start date
 bookingSchema.pre('save', function (next) {

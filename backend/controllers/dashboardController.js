@@ -1,11 +1,14 @@
 const Booking = require('../models/Booking');
 const Product = require('../models/Product');
+const { autoCancelExpiredPendingBookings } = require('../services/bookingExpiryService');
 
 // @desc    Get user dashboard data
 // @route   GET /api/dashboard
 // @access  Private
 const getDashboard = async (req, res) => {
   try {
+    await autoCancelExpiredPendingBookings();
+
     // Get user's bookings
     const myBookings = await Booking.find({ user: req.user.id })
       .populate('product')
